@@ -9,7 +9,11 @@ from ray import serve
 app = FastAPI()
 
 
+<<<<<<< HEAD
 @serve.deployment(num_replicas=1, route_prefix="/")
+=======
+@serve.deployment(num_replicas=1)
+>>>>>>> 502d152 (initial commit)
 @serve.ingress(app)
 class APIIngress:
     def __init__(self, diffusion_model_handle) -> None:
@@ -23,8 +27,13 @@ class APIIngress:
     async def generate(self, prompt: str, img_size: int = 512):
         assert len(prompt), "prompt parameter cannot be empty"
 
+<<<<<<< HEAD
         image_ref = await self.handle.generate.remote(prompt, img_size=img_size)
         image = await image_ref
+=======
+        image = await self.handle.generate.remote(prompt, img_size=img_size)
+
+>>>>>>> 502d152 (initial commit)
         file_stream = BytesIO()
         image.save(file_stream, "PNG")
         return Response(content=file_stream.getvalue(), media_type="image/png")
@@ -36,16 +45,32 @@ class APIIngress:
 )
 class StableDiffusionV2:
     def __init__(self):
-        from diffusers import EulerDiscreteScheduler, StableDiffusionPipeline
+        from diffusers import EulerDiscreteScheduler, StableDiffusionPipeline, DiffusionPipeline
 
         model_id = "stabilityai/stable-diffusion-2"
+        # model_id = "stabilityai/stable-diffusion-xl-base-1.0"
 
         scheduler = EulerDiscreteScheduler.from_pretrained(
             model_id, subfolder="scheduler"
         )
-        self.pipe = StableDiffusionPipeline.from_pretrained(
-            model_id, scheduler=scheduler, revision="fp16", torch_dtype=torch.float16
+
+        self.pipe = StableDiffusionPipeline.from_single_file(
+            "./768-v-ema.safetensors",
+            scheduler=scheduler, revision="fp16", torch_dtype=torch.float16
         )
+
+        # self.pipe = StableDiffusionPipeline.from_pretrained(
+        #     model_id, scheduler=scheduler, revision="fp16", torch_dtype=torch.float16
+        # )
+
+        # self.pipe = DiffusionPipeline.from_pretrained(
+        #     model_id, scheduler=scheduler, torch_dtype=torch.float16, use_safetensors=True, variant="fp16"
+        # )
+
+        # self.pipe = DiffusionPipeline.from_single_file(
+            # "sd_xl_base_1.0.safetensors", scheduler=scheduler, torch_dtype=torch.float16, use_safetensors=True, variant="fp16"
+        # )
+
         self.pipe = self.pipe.to("cuda")
 
     def generate(self, prompt: str, img_size: int = 512):
@@ -53,7 +78,7 @@ class StableDiffusionV2:
 
         with torch.autocast("cuda"):
             image = self.pipe(prompt, height=img_size, width=img_size).images[0]
+            # image = self.pipe(prompt).images[0]
             return image
-
 
 entrypoint = APIIngress.bind(StableDiffusionV2.bind())
