@@ -45,14 +45,14 @@ class StableDiffusionV2:
             model_id, subfolder="scheduler"
         )
 
-        self.pipe = StableDiffusionPipeline.from_single_file(
-            "./768-v-ema.safetensors",
-            scheduler=scheduler, revision="fp16", torch_dtype=torch.float16
-        )
-
-        # self.pipe = StableDiffusionPipeline.from_pretrained(
-        #     model_id, scheduler=scheduler, revision="fp16", torch_dtype=torch.float16
+        # self.pipe = StableDiffusionPipeline.from_single_file(
+        #     "./768-v-ema.safetensors",
+        #     scheduler=scheduler, revision="fp16", torch_dtype=torch.float16
         # )
+
+        self.pipe = StableDiffusionPipeline.from_pretrained(
+            model_id, scheduler=scheduler, revision="fp16", torch_dtype=torch.float16
+        )
 
         # self.pipe = DiffusionPipeline.from_pretrained(
         #     model_id, scheduler=scheduler, torch_dtype=torch.float16, use_safetensors=True, variant="fp16"

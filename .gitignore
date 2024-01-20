@@ -3,3 +3,4 @@ __pycache__
 stable_diffusion/v2-1_768-nonema-pruned.ckpt
 stable_diffusion/sd_xl_base_1.0.safetensors
 stable_diffusion/768-v-ema.safetensors
+output.png
