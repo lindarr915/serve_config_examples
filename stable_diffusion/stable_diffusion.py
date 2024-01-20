@@ -32,7 +32,8 @@ class APIIngress:
 
 @serve.deployment(
     ray_actor_options={"num_gpus": 1},
-    autoscaling_config={"min_replicas": 0, "max_replicas": 2},
+    autoscaling_config={"min_replicas": 0, "max_replicas": 20},
+
 )
 class StableDiffusionV2:
     def __init__(self):
@@ -64,6 +65,7 @@ class StableDiffusionV2:
 
         self.pipe = self.pipe.to("cuda")
 
+    # @serve.batch(max_batch_size=8, batch_wait_timeout_s=0.1)
     def generate(self, prompt: str, img_size: int = 512):
         assert len(prompt), "prompt parameter cannot be empty"
 
@@ -73,3 +75,6 @@ class StableDiffusionV2:
             return image
 
 entrypoint = APIIngress.bind(StableDiffusionV2.bind())
+
+if __name__ == "__main__":
+    serve.run(entrypoint)
