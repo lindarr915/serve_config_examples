@@ -38,34 +38,31 @@ class APIIngress:
 class StableDiffusionV2:
     def __init__(self):
         from diffusers import EulerDiscreteScheduler, StableDiffusionPipeline, DiffusionPipeline
+        import subprocess
+
 
         model_id = "stabilityai/stable-diffusion-2"
-        # model_id = "stabilityai/stable-diffusion-xl-base-1.0"
 
         scheduler = EulerDiscreteScheduler.from_pretrained(
             model_id, subfolder="scheduler"
         )
 
-        # self.pipe = StableDiffusionPipeline.from_single_file(
-        #     "./768-v-ema.safetensors",
-        #     scheduler=scheduler, revision="fp16", torch_dtype=torch.float16
-        # )
+        media = "-ebs" # "-nvme"
 
-        self.pipe = StableDiffusionPipeline.from_pretrained(
-            model_id, scheduler=scheduler, revision="fp16", torch_dtype=torch.float16
+        result = subprocess.run(f"s5cmd cp s3://ml-loading-test/v2-1_768-ema-pruned.safetensors ./model{media}/", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+        self.pipe = StableDiffusionPipeline.from_single_file(
+            f"./model{media}/v2-1_768-ema-pruned.safetensors",
+            # "./model-s3mount/v2-1_768-ema-pruned.safetensors",
+            scheduler=scheduler, revision="fp16", torch_dtype=torch.float16
         )
 
-        # self.pipe = DiffusionPipeline.from_pretrained(
-        #     model_id, scheduler=scheduler, torch_dtype=torch.float16, use_safetensors=True, variant="fp16"
-        # )
-
-        # self.pipe = DiffusionPipeline.from_single_file(
-            # "sd_xl_base_1.0.safetensors", scheduler=scheduler, torch_dtype=torch.float16, use_safetensors=True, variant="fp16"
+        # self.pipe = StableDiffusionPipeline.from_pretrained(
+        #     model_id, scheduler=scheduler, revision="fp16", torch_dtype=torch.float16
         # )
 
         self.pipe = self.pipe.to("cuda")
 
-    # @serve.batch(max_batch_size=8, batch_wait_timeout_s=0.1)
     def generate(self, prompt: str, img_size: int = 512):
         assert len(prompt), "prompt parameter cannot be empty"
 
@@ -76,5 +73,5 @@ class StableDiffusionV2:
 
 entrypoint = APIIngress.bind(StableDiffusionV2.bind())
 
-if __name__ == "__main__":
-    serve.run(entrypoint)
+# if __name__ == "__main__":
+#     serve.run(entrypoint)

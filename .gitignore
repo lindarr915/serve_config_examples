@@ -4,3 +4,9 @@ stable_diffusion/v2-1_768-nonema-pruned.ckpt
 stable_diffusion/sd_xl_base_1.0.safetensors
 stable_diffusion/768-v-ema.safetensors
 output.png
+sd_xl_base_1.0.safetensors?download=true
+v2-1_768-ema-pruned.safetensors?download=true
+sd_xl_base_1.0.safetensors
+v2-1_768-ema-pruned.safetensors
+stable_diffusion/model-ebs/768-v-ema.safetensors
+stable_diffusion/model-ebs/v2-1_768-nonema-pruned.ckpt
